@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS cryptoUsersDB;
+CREATE DATABASE cryptoUsersDB;
