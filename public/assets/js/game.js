@@ -8,6 +8,10 @@ var transactions = [];
 var userLoggedIn;
 var wallet;
 
+
+
+
+
 // ===========================================
 // Transactions page
 // ===========================================
@@ -18,7 +22,7 @@ $(document).ready((function () {
         method: "GET"
     }).then(function (res) {
         let cryptos = res.data;
-        console.log(cryptos)
+        // console.log(cryptos)
 
         // Grabs the default coin (Bitcoin) and displays its information to the page
         coinId = $('#coinDropdown').val();
@@ -42,7 +46,6 @@ $(document).ready((function () {
             event.preventDefault();
 
             let loginID = { loginID: $("#loginID").val() }
-            console.log(loginID)
 
             // TODO:
             // For some reason a $.get didn't send the object, but a $.post does?
@@ -53,6 +56,7 @@ $(document).ready((function () {
 
                 // Parses the user's wallet from the database
                 wallet = JSON.parse(userLoggedIn[0].wallet);
+
                 $("#showLogin").html(`User signed in as email: ${userLoggedIn[0].userId}
             User money: $${wallet.cash}`);
                 console.log("User logged in: " + JSON.stringify(userLoggedIn));
@@ -65,13 +69,10 @@ $(document).ready((function () {
             event.preventDefault();
             console.log("insert transaction: " + JSON.stringify(wallet))
 
-            // console.log(cryptos[coinId])
             buyAmount = $("#buyAmount").val();
-            console.log("before: " + wallet.BTC)
 
+            // Grab the symbol of the crypto being purchased
             let coinSymbol = cryptos[coinId].symbol;
-            console.log("In transaction symbol: " + coinSymbol)
-            wallet.push(coinSymbol = 3)
 
             // Determine the cost of the overall transaction
             let transactionCost = cryptos[coinId].quotes.USD.price * buyAmount;
@@ -82,7 +83,16 @@ $(document).ready((function () {
             if (transactionCost > wallet.cash) {
                 $("#transactionStatus").html("You cannot afford this transaction")
             } else {
-                wallet.BTC = Number(wallet.BTC) + Number(buyAmount)
+                // Proceeds with the transaction if it's affordable
+
+
+                // Checks if coin is in wallet yet, and adds it if not
+                if (!wallet.hasOwnProperty(coinSymbol)) {
+                    wallet[coinSymbol] = 0;
+                };
+
+                // NOTE: This doesn't quite work yet
+                wallet[coinSymbol] = Number(wallet[coinSymbol]) + Number(buyAmount)
                 var transactions = {
                     coin: cryptos[coinId].symbol,
                     coinId: coinId,
@@ -91,10 +101,8 @@ $(document).ready((function () {
                     // Temporary foreignKey solution
                     foreignKey: userLoggedIn[0].id
                 };
-                
+
                 $.post("/api/User/transactions", transactions).then(function () {
-                    
-                    console.log("after: " + wallet.BTC)
 
                     $("#transactionStatus").html("Transaction complete!");
                     updateWallet(transactionCost);
@@ -141,11 +149,10 @@ $(document).ready((function () {
 // Update the money of the "logged-in" user
 function updateWallet(transactionCost) {
 
-
-    console.log("update money: " + JSON.stringify(wallet))
-
     // Subtracts the cost of the transaction from the user
     wallet.cash -= transactionCost;
+
+    console.log("update wallet: " + JSON.stringify(wallet))
 
     let userMoney = {
         id: userLoggedIn[0].id,
