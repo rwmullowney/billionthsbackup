@@ -53,7 +53,6 @@ $(document).ready((function () {
 
                 // Parses the user's wallet from the database
                 wallet = JSON.parse(userLoggedIn[0].wallet);
-
                 $("#showLogin").html(`User signed in as email: ${userLoggedIn[0].userId}
             User money: $${wallet.cash}`);
                 console.log("User logged in: " + JSON.stringify(userLoggedIn));
@@ -66,11 +65,13 @@ $(document).ready((function () {
             event.preventDefault();
             console.log("insert transaction: " + JSON.stringify(wallet))
 
+            // console.log(cryptos[coinId])
             buyAmount = $("#buyAmount").val();
+            console.log("before: " + wallet.BTC)
 
-            // Grab the symbol of the crypto being purchased
             let coinSymbol = cryptos[coinId].symbol;
-            console.log("before: " + wallet[coinSymbol])
+            console.log("In transaction symbol: " + coinSymbol)
+            wallet.push(coinSymbol = 3)
 
             // Determine the cost of the overall transaction
             let transactionCost = cryptos[coinId].quotes.USD.price * buyAmount;
@@ -81,17 +82,7 @@ $(document).ready((function () {
             if (transactionCost > wallet.cash) {
                 $("#transactionStatus").html("You cannot afford this transaction")
             } else {
-                // Proceeds with the transaction if it's affordable
-
-
-                // Checks if coin is in wallet yet, and adds it if not
-                if (!wallet.hasOwnProperty(coinSymbol)) {
-                    wallet[coinSymbol] = 0;
-                    console.log("it's not in the wallet")
-                };
-
-                // NOTE: This doesn't quite work yet
-                wallet[coinSymbol] = Number(wallet[coinSymbol]) + Number(buyAmount)
+                wallet.BTC = Number(wallet.BTC) + Number(buyAmount)
                 var transactions = {
                     coin: cryptos[coinId].symbol,
                     coinId: coinId,
@@ -100,9 +91,9 @@ $(document).ready((function () {
                     // Temporary foreignKey solution
                     foreignKey: userLoggedIn[0].id
                 };
-
+                
                 $.post("/api/User/transactions", transactions).then(function () {
-
+                    
                     console.log("after: " + wallet.BTC)
 
                     $("#transactionStatus").html("Transaction complete!");
