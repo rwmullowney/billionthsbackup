@@ -8,6 +8,10 @@ module.exports = function(app){
 		res.render("transactions");
 	})
 
+	app.get('/profile', (req, res) => {
+		res.render("profile");
+	})
+
 	app.get("/index", (req, res) => {
 		res.render("dashboard");
 
